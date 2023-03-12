@@ -11,10 +11,28 @@ use hos::println;
 pub extern "C" fn _start() -> ! {
     println!("Hello World{}", "!");
 
+    hos::init();
+
+    fn stack_overflow() {
+        stack_overflow(); // for each recursion, the return address is pushed
+    }
+
+    // uncomment line below to trigger a stack overflow
+    // stack_overflow();
+
+    // uncomment line below to trigger a page fault
+    // unsafe {
+    //     *(0xdeadbeef as *mut u64) = 42;
+    // };
+
+    // uncomment line below to invoke a breakpoint exception
+    // x86_64::instructions::interrupts::int3();
+
     #[cfg(test)]
     test_main();
 
-    loop {}
+    println!("It did not crash!");
+    hos::hlt_loop();
 }
 
 /// This function is called on panic.
@@ -22,7 +40,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    hos::hlt_loop();
 }
 
 #[cfg(test)]
